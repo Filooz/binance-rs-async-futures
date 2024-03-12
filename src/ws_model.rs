@@ -1,4 +1,15 @@
-use crate::rest_model::{string_or_float, Asks, Bids, ExecutionType, OrderBook, OrderSide, OrderStatus, OrderType, TimeInForce};
+use crate::rest_model::{string_or_float, Asks, Bids, ExecutionType, OrderBook, OrderSide, OrderStatus, OrderType,
+                        TimeInForce};
+
+use crate::futures::ws_model::WebsocketEvent as FuturesWebsocketEvent;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum BinanceWsMessage {
+    WebsocketEvent(WebsocketEvent),
+    FuturesWebsocketEvent(FuturesWebsocketEvent),
+    MarkPriceArr(Vec<MarkPriceEvent>),
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "e")]

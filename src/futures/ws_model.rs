@@ -1,14 +1,14 @@
 use crate::futures::rest_model::{MarginType, OrderType, PositionSide, WorkingType};
 use crate::rest_model::{string_or_float, string_or_float_opt, ExecutionType, OrderSide, OrderStatus, TimeInForce};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE", tag = "e")]
 pub enum WebsocketEvent {
     AccountUpdate(Box<AccountUpdate>),
     OrderTradeUpdate(Box<OrderTradeUpdate>),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct AccountUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
@@ -18,7 +18,7 @@ pub struct AccountUpdate {
     pub account: Account,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Account {
     #[serde(rename = "m")]
     pub reason_type: ReasonType,
@@ -28,7 +28,7 @@ pub struct Account {
     pub positions: Vec<Position>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ReasonType {
     Deposit,
@@ -50,7 +50,7 @@ pub enum ReasonType {
     CoinSwapWithdraw,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Balance {
     #[serde(rename = "a")]
     pub asset: String,
@@ -62,7 +62,7 @@ pub struct Balance {
     pub balance_change: f64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Position {
     #[serde(rename = "s")]
     pub symbol: String,
@@ -84,7 +84,7 @@ pub struct Position {
     pub position_side: PositionSide,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct OrderTradeUpdate {
     #[serde(rename = "E")]
     pub event_time: u64,
@@ -94,7 +94,7 @@ pub struct OrderTradeUpdate {
     pub order: Order,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Order {
     #[serde(rename = "s")]
     pub symbol: String,
@@ -163,10 +163,10 @@ pub struct Order {
     #[serde(rename = "pm")]
     pub price_match: PriceMatch,
     #[serde(rename = "gtd")]
-    pub good_till_date: u64
+    pub good_till_date: u64,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PriceMatch {
     /// No price match
@@ -189,7 +189,7 @@ pub enum PriceMatch {
     Queue20,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SelfTradePreventionMode {
     /// No Self-Trade Prevention
