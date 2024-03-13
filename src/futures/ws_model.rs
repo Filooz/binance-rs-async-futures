@@ -1,11 +1,14 @@
 use crate::futures::rest_model::{MarginType, OrderType, PositionSide, WorkingType};
 use crate::rest_model::{string_or_float, string_or_float_opt, ExecutionType, OrderSide, OrderStatus, TimeInForce};
+use crate::ws_model::MarkPriceEvent;
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE", tag = "e")]
 pub enum WebsocketEvent {
     AccountUpdate(Box<AccountUpdate>),
     OrderTradeUpdate(Box<OrderTradeUpdate>),
+    #[serde(alias = "markPriceUpdate")]
+    MarkPriceUpdate(Box<MarkPriceEvent>),
 }
 
 #[derive(Clone, Serialize, Debug, Deserialize)]
