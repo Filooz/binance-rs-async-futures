@@ -206,7 +206,10 @@ impl Client {
 
     async fn handler<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
         match response.status() {
-            StatusCode::OK => Ok(response.json().await?),
+            StatusCode::OK => {
+                let json = response.json().await?;
+                Ok(json)
+            }
             StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
             StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
             StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),
