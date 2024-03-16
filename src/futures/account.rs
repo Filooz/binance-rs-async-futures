@@ -48,7 +48,7 @@ pub struct GetOrderRequest {
     pub orig_client_order_id: Option<String>,
 }
 
-#[derive(Serialize, Default)]
+#[derive(Serialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderRequest {
     pub symbol: String,
