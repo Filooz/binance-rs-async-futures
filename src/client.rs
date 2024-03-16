@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use boolinator::Boolinator;
 use hex::encode as hex_encode;
+use log::debug;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::Response;
 use reqwest::StatusCode;
@@ -99,7 +100,7 @@ impl Client {
             .headers(self.build_headers(true)?)
             .send()
             .await?;
-
+        debug!("response: {:?}", response);
         self.handler(response).await
     }
 
