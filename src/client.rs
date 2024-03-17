@@ -99,7 +99,6 @@ impl Client {
             .headers(self.build_headers(true)?)
             .send()
             .await?;
-
         self.handler(response).await
     }
 
