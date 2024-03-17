@@ -2,7 +2,6 @@ use std::time::Duration;
 
 use boolinator::Boolinator;
 use hex::encode as hex_encode;
-use log::debug;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE, USER_AGENT};
 use reqwest::Response;
 use reqwest::StatusCode;
@@ -100,7 +99,6 @@ impl Client {
             .headers(self.build_headers(true)?)
             .send()
             .await?;
-        debug!("response: {:?}", response);
         self.handler(response).await
     }
 
@@ -206,10 +204,7 @@ impl Client {
 
     async fn handler<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
         match response.status() {
-            StatusCode::OK => {
-                let json = response.json().await?;
-                Ok(json)
-            }
+            StatusCode::OK => Ok(response.json().await?),
             StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
             StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
             StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),
