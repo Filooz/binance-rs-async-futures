@@ -17,6 +17,12 @@ pub struct FuturesAccount {
     pub recv_window: u64,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct CancelAllResponse {
+    code: i32,
+    msg: String,
+}
+
 /// Serialize bool as str
 fn serialize_as_str<S, T>(t: &T, serializer: S) -> std::result::Result<S::Ok, S::Error>
 where
@@ -277,7 +283,7 @@ impl FuturesAccount {
     }
 
     /// Cancel all open orders on this symbol
-    pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<()>
+    pub async fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<CancelAllResponse>
     where
         S: Into<String>,
     {
@@ -287,7 +293,6 @@ impl FuturesAccount {
                 PairQuery { symbol: symbol.into() },
                 self.recv_window,
             )
-            .await?;
-        Ok(())
+            .await
     }
 }
