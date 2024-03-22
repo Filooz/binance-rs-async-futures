@@ -100,13 +100,15 @@ impl FuturesAccount {
     }
 
     /// Get currently open orders
-    pub async fn get_open_orders(&self, symbol: Option<impl Into<String>>) -> Result<Vec<Order>> {
+    pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
         let mut params = vec![];
+        params.push(("symbol", symbol.into()));
+        let payload = build_signed_request_p(params, self.recv_window)?;
+        self.client.get_signed("/fapi/v1/openOrders", &payload).await
+    }
 
-        if let Some(sym) = symbol {
-            params.push(("symbol", sym.into()));
-        }
-
+    pub async fn get_all_open_orders(&self) -> Result<Vec<Order>> {
+        let params: Vec<&str> = vec![];
         let payload = build_signed_request_p(params, self.recv_window)?;
         self.client.get_signed("/fapi/v1/openOrders", &payload).await
     }
