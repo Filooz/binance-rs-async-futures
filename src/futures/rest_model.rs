@@ -621,6 +621,8 @@ pub struct FundingRate {
     pub funding_time: u64,
     #[serde(with = "string_or_float")]
     pub funding_rate: f64,
+    #[serde(with = "string_or_float")]
+    pub mark_price: f64,
 }
 
 pub static PERIODS: &[&str] = &["5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"];
