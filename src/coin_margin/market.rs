@@ -46,7 +46,7 @@ mod tests {
     use crate::api::Binance;
 
     #[tokio::test]
-    async fn test_get_funding_rate() {
+    async fn test_coin_market_funding_rate() {
         // setup logger
         let _ = env_logger::builder().is_test(true).try_init();
         let market: CoinMarket = Binance::new(None, None);

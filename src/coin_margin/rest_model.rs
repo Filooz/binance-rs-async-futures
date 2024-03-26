@@ -1,7 +1,8 @@
 pub use crate::rest_model::{string_or_float, string_or_u64, Asks, Bids, BookTickers, KlineSummaries, KlineSummary,
                             OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice, SymbolStatus, Tickers,
                             TimeInForce};
-use crate::{futures::rest_model::PositionSide, rest_model::OrderType};
+use crate::{futures::rest_model::{Filters, PositionSide},
+            rest_model::OrderType};
 
 use serde::{Deserialize, Serialize};
 
@@ -125,4 +126,79 @@ pub struct AccountBalance {
     #[serde(with = "string_or_float")]
     pub available_balance: f64,
     pub update_time: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ExchangeInformation {
+    pub exchange_filters: Vec<Filters>,
+    pub rate_limits: Vec<RateLimit>,
+    pub server_time: u64,
+    pub symbols: Vec<Symbol>,
+    pub timezone: String,
+    // does not exist in dapi (26.3.24)
+    // pub assets: Vec<AssetDetail>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Symbol {
+    pub filters: Vec<Filters>,
+    pub order_types: Vec<OrderType>,
+    pub time_in_force: Vec<TimeInForce>,
+    #[serde(with = "string_or_float")]
+    pub liquidation_fee: f64,
+    #[serde(with = "string_or_float")]
+    pub market_take_bound: f64,
+    pub symbol: String,
+    pub pair: String,
+    pub contract_type: ContractType,
+    pub delivery_date: u64,
+    pub onboard_date: u64,
+    pub contract_status: ContractStatus,
+    pub contract_size: u64,
+    pub quote_asset: String,
+    pub base_asset: String,
+    pub margin_asset: String,
+    pub price_precision: u64,
+    pub quantity_precision: u64,
+    pub base_asset_precision: u64,
+    pub quote_precision: u64,
+    pub equal_qty_precision: u64,
+    #[serde(with = "string_or_float")]
+    pub trigger_protect: f64,
+    #[serde(with = "string_or_float", rename = "maintMarginPercent")]
+    pub maintenance_margin_percent: f64,
+    #[serde(with = "string_or_float")]
+    pub required_margin_percent: f64,
+    pub underlying_type: String,
+    pub underlying_sub_type: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ContractStatus {
+    PendingTrading,
+    Trading,
+    PreDelivering,
+    Delivering,
+    Delivered,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ContractType {
+    Perpetual,
+    CurrentMonth,
+    NextMonth,
+    CurrentQuarter,
+    NextQuarter,
+    #[serde(rename = "NEXT_QUARTER DELIVERING")]
+    NextQuarterDelivery,
+    #[serde(rename = "CURRENT_QUARTER DELIVERING")]
+    CurrentQuarterDelivery,
+    #[serde(rename = "PERPETUAL DELIVERING")]
+    PerpetualDelivery,
+    #[serde(rename = "")]
+    Empty,
 }
