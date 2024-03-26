@@ -3,12 +3,12 @@ use crate::{client::*,
             futures::rest_model::{FundingRate, HistoryQuery}};
 
 #[derive(Clone)]
-pub struct CoinmMarket {
+pub struct CoinMarket {
     pub client: Client,
     pub recv_window: u64,
 }
 
-impl CoinmMarket {
+impl CoinMarket {
     pub async fn get_funding_rate<S1, S3, S4, S5>(
         &self,
         symbol: S1,
@@ -49,7 +49,7 @@ mod tests {
     async fn test_get_funding_rate() {
         // setup logger
         let _ = env_logger::builder().is_test(true).try_init();
-        let market: CoinmMarket = Binance::new(None, None);
+        let market: CoinMarket = Binance::new(None, None);
         let limit: u16 = 10;
         let funding_rate = market.get_funding_rate("BTCUSD_PERP", None, None, limit).await;
         println!("{:?}", funding_rate);
