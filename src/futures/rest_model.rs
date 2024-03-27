@@ -79,6 +79,7 @@ pub enum OrderType {
     TakeProfit,
     TakeProfitMarket,
     TrailingStopMarket,
+    Liquidation,
 }
 
 /// By default, use market orders
