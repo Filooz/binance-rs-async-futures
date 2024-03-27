@@ -1,6 +1,7 @@
 use crate::client::*;
 use crate::errors::*;
 use crate::rest_model::ServerTime;
+use crate::rest_model::Success;
 
 use super::rest_model::ExchangeInformation;
 
@@ -12,7 +13,7 @@ pub struct CoinGeneral {
 
 impl CoinGeneral {
     pub async fn ping(&self) -> Result<String> {
-        let _: serde_json::Value = self.client.get("/dapi/v1/ping", None).await?;
+        let _: Success = self.client.get("/dapi/v1/ping", None).await?;
         Ok("pong".into())
     }
 
