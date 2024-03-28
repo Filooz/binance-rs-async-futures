@@ -43,13 +43,11 @@ pub fn all_mini_ticker_stream() -> &'static str { "!miniTicker@arr" }
 pub fn mini_ticker_stream(symbol: &str) -> String { format!("{symbol}@miniTicker") }
 
 /// # Arguments
-/// 
 /// * `symbol`: the market symbol
 /// * `update_speed`: 1 or 3
 pub fn mark_price_stream(symbol: &str, update_speed: u8) -> String { format!("{symbol}@markPrice@{update_speed}s") }
 
 /// # Arguments
-///
 /// * `symbol`: the market symbol
 /// * `levels`: 5, 10 or 20
 /// * `update_speed`: 1000 or 100
@@ -65,39 +63,16 @@ pub fn diff_book_depth_stream(symbol: &str, update_speed: u16) -> String { forma
 
 fn combined_stream(streams: Vec<String>) -> String { streams.join("/") }
 
-pub struct WebSockets<'a, WE> {
+pub struct SocketHandler {
     pub socket: Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)>,
-    handler: Box<dyn FnMut(WE) -> Result<()> + 'a + Send>,
     conf: Config,
 }
 
-impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
-    /// New websocket holder with default configuration
-    /// # Examples
-    /// see examples/binance_websockets.rs
-    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
-    where
-        Callback: FnMut(WE) -> Result<()> + 'a + Send,
-    {
-        Self::new_with_options(handler, Config::default())
-    }
+impl SocketHandler {
+    pub fn new() -> SocketHandler { Self::new_with_options(Config::default()) }
 
-    /// New websocket holder with provided configuration
-    /// # Examples
-    /// see examples/binance_websockets.rs
-    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
-    where
-        Callback: FnMut(WE) -> Result<()> + 'a + Send,
-    {
-        WebSockets {
-            socket: None,
-            handler: Box::new(handler),
-            conf,
-        }
-    }
+    pub fn new_with_options(conf: Config) -> SocketHandler { SocketHandler { socket: None, conf } }
 
-    /// Connect to multiple websocket endpoints
-    /// N.B: WE has to be CombinedStreamEvent
     pub async fn connect_multiple(&mut self, endpoints: Vec<String>) -> Result<()> {
         let mut url = Url::parse(&self.conf.ws_endpoint)?;
         url.path_segments_mut()
@@ -124,7 +99,7 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
         self.handle_connect(url).await
     }
 
-    async fn handle_connect(&mut self, url: Url) -> Result<()> {
+    pub async fn handle_connect(&mut self, url: Url) -> Result<()> {
         match connect_async(url).await {
             Ok(answer) => {
                 self.socket = Some(answer);
@@ -145,10 +120,52 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
     }
 
     pub fn socket(&self) -> &Option<(WebSocketStream<MaybeTlsStream<TcpStream>>, Response)> { &self.socket }
+}
+
+pub struct WebSockets<'a, WE> {
+    pub socket_handler: SocketHandler,
+    handler: Box<dyn FnMut(WE) -> Result<()> + 'a + Send>,
+}
+
+impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
+    pub fn new<Callback>(handler: Callback) -> WebSockets<'a, WE>
+    where
+        Callback: FnMut(WE) -> Result<()> + 'a + Send,
+    {
+        Self::new_with_options(handler, Config::default())
+    }
+
+    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> WebSockets<'a, WE>
+    where
+        Callback: FnMut(WE) -> Result<()> + 'a + Send,
+    {
+        let socket_handler = SocketHandler::new_with_options(conf);
+        WebSockets {
+            socket_handler,
+            handler: Box::new(handler),
+        }
+    }
+
+    pub async fn connect_multiple(&mut self, endpoints: Vec<String>) -> Result<()> {
+        self.socket_handler.connect_multiple(endpoints).await
+    }
+
+    /// Connect to a websocket endpoint
+    pub async fn connect(&mut self, endpoint: &str) -> Result<()> { self.socket_handler.connect(endpoint).await }
+
+    /// Connect to a futures websocket endpoint
+    pub async fn connect_futures(&mut self, endpoint: &str) -> Result<()> {
+        self.socket_handler.connect_futures(endpoint).await
+    }
+
+    pub async fn handle_connect(&mut self, url: Url) -> Result<()> { self.socket_handler.handle_connect(url).await }
+
+    /// Disconnect from the endpoint
+    pub async fn disconnect(&mut self) -> Result<()> { self.socket_handler.disconnect().await }
 
     pub async fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {
-            if let Some((ref mut socket, _)) = self.socket {
+            if let Some((ref mut socket, _)) = self.socket_handler.socket {
                 // TODO: return error instead of panic?
                 let message = socket.next().await.unwrap()?;
 
@@ -158,6 +175,69 @@ impl<'a, WE: serde::de::DeserializeOwned> WebSockets<'a, WE> {
                             return Ok(());
                         }
                         let event: WE = from_str(msg.as_str())?;
+                        (self.handler)(event)?;
+                    }
+                    Message::Ping(_) | Message::Pong(_) | Message::Binary(_) | Message::Frame(_) => {}
+                    Message::Close(e) => {
+                        return Err(Error::Msg(format!("Disconnected {e:?}")));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+pub struct StringSocket<'a> {
+    pub socket_handler: SocketHandler,
+    handler: Box<dyn FnMut(&str) -> Result<()> + 'a + Send>,
+}
+
+impl<'a> StringSocket<'a> {
+    pub fn new<Callback>(handler: Callback) -> StringSocket<'a>
+    where
+        Callback: FnMut(&str) -> Result<()> + 'a + Send,
+    {
+        Self::new_with_options(handler, Config::default())
+    }
+
+    pub fn new_with_options<Callback>(handler: Callback, conf: Config) -> StringSocket<'a>
+    where
+        Callback: FnMut(&str) -> Result<()> + 'a + Send,
+    {
+        let socket_handler = SocketHandler::new_with_options(conf);
+        StringSocket {
+            socket_handler,
+            handler: Box::new(handler),
+        }
+    }
+
+    pub async fn connect_multiple(&mut self, endpoints: Vec<String>) -> Result<()> {
+        self.socket_handler.connect_multiple(endpoints).await
+    }
+
+    pub async fn connect(&mut self, endpoint: &str) -> Result<()> { self.socket_handler.connect(endpoint).await }
+
+    pub async fn connect_futures(&mut self, endpoint: &str) -> Result<()> {
+        self.socket_handler.connect_futures(endpoint).await
+    }
+
+    pub async fn handle_connect(&mut self, url: Url) -> Result<()> { self.socket_handler.handle_connect(url).await }
+
+    pub async fn disconnect(&mut self) -> Result<()> { self.socket_handler.disconnect().await }
+
+    pub async fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+        while running.load(Ordering::Relaxed) {
+            if let Some((ref mut socket, _)) = self.socket_handler.socket {
+                // TODO: return error instead of panic?
+                let message = socket.next().await.unwrap()?;
+
+                match message {
+                    Message::Text(msg) => {
+                        if msg.is_empty() {
+                            return Ok(());
+                        }
+                        let event: &str = msg.as_str();
                         (self.handler)(event)?;
                     }
                     Message::Ping(_) | Message::Pong(_) | Message::Binary(_) | Message::Frame(_) => {}

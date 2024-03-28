@@ -11,7 +11,7 @@ pub struct FuturesGeneral {
 impl FuturesGeneral {
     /// Test connectivity
     pub async fn ping(&self) -> Result<String> {
-        self.client.get("/fapi/v1/ping", None).await?;
+        let _: serde_json::Value = self.client.get("/fapi/v1/ping", None).await?;
         Ok("pong".into())
     }
 
@@ -42,5 +42,20 @@ impl FuturesGeneral {
             }
             Err(e) => Err(e),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{api::Binance, config::Config};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_futures_general_ping() {
+        let general: FuturesGeneral = Binance::new_with_env(&Config::default());
+        let pong = general.ping().await;
+        println!("{:?}", pong);
+        assert!(pong.is_ok());
     }
 }

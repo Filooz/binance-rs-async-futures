@@ -47,9 +47,9 @@ pub struct Symbol {
     pub underlying_type: String,
     pub underlying_sub_type: Vec<String>,
     pub settle_plan: u64,
+    pub filters: Vec<Filters>,
     #[serde(with = "string_or_float")]
     pub trigger_protect: f64,
-    pub filters: Vec<Filters>,
     pub order_types: Vec<OrderType>,
     pub time_in_force: Vec<TimeInForce>,
 }
@@ -79,6 +79,7 @@ pub enum OrderType {
     TakeProfit,
     TakeProfitMarket,
     TrailingStopMarket,
+    Liquidation,
 }
 
 /// By default, use market orders
@@ -621,6 +622,8 @@ pub struct FundingRate {
     pub funding_time: u64,
     #[serde(with = "string_or_float")]
     pub funding_rate: f64,
+    #[serde(with = "string_or_float")]
+    pub mark_price: f64,
 }
 
 pub static PERIODS: &[&str] = &["5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d"];

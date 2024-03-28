@@ -77,6 +77,7 @@ pub mod util;
 
 pub mod account;
 pub mod api;
+pub mod coin_margin;
 pub mod config;
 #[cfg(feature = "futures_api")]
 pub mod futures;
