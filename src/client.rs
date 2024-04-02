@@ -248,25 +248,20 @@ impl GenericClient {
         }
     }
 
-    pub async fn get_signed<T: DeserializeOwned>(&self, host: String, endpoint: &str, request: &str) -> Result<T> {
+    pub async fn get_signed<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(host, endpoint, request);
         let response = self.inner.get(&url).headers(self.build_headers(true)?).send().await?;
 
         self.handler(response).await
     }
 
-    pub async fn get_signed_d<T: de::DeserializeOwned>(
-        &self,
-        host: String,
-        endpoint: &str,
-        request: &str,
-    ) -> Result<T> {
+    pub async fn get_signed_d<T: de::DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
         self.get_signed(host, endpoint, request).await
     }
 
     pub async fn get_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         payload: Option<P>,
         recv_window: u64,
@@ -275,25 +270,20 @@ impl GenericClient {
         self.get_signed(host, endpoint, &req).await
     }
 
-    pub async fn post_signed<T: DeserializeOwned>(&self, host: String, endpoint: &str, request: &str) -> Result<T> {
+    pub async fn post_signed<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(host, endpoint, request);
         let response = self.inner.post(&url).headers(self.build_headers(true)?).send().await?;
 
         self.handler(response).await
     }
 
-    pub async fn post_signed_d<T: de::DeserializeOwned>(
-        &self,
-        host: String,
-        endpoint: &str,
-        request: &str,
-    ) -> Result<T> {
+    pub async fn post_signed_d<T: de::DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
         self.post_signed(host, endpoint, request).await
     }
 
     pub async fn post_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         payload: P,
         recv_window: u64,
@@ -304,7 +294,7 @@ impl GenericClient {
 
     pub async fn delete_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         payload: P,
         recv_window: u64,
@@ -313,7 +303,7 @@ impl GenericClient {
         self.delete_signed(host, endpoint, &request).await
     }
 
-    pub async fn delete_signed<T: DeserializeOwned>(&self, host: String, endpoint: &str, request: &str) -> Result<T> {
+    pub async fn delete_signed<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
         let url = self.sign_request(host, endpoint, request);
         let response = self
             .inner
@@ -324,7 +314,7 @@ impl GenericClient {
         self.handler(response).await
     }
 
-    pub async fn get<T: DeserializeOwned>(&self, host: String, endpoint: &str, request: Option<&str>) -> Result<T> {
+    pub async fn get<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: Option<&str>) -> Result<T> {
         let url = request
             .map(|r| format!("{}{}?{}", host, endpoint, r))
             .unwrap_or_else(|| format!("{}{}", host, endpoint));
@@ -334,13 +324,13 @@ impl GenericClient {
         self.handler(response).await
     }
 
-    pub async fn get_p<T: DeserializeOwned>(&self, host: String, endpoint: &str, request: Option<&str>) -> Result<T> {
+    pub async fn get_p<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: Option<&str>) -> Result<T> {
         self.get(host, endpoint, request).await
     }
 
     pub async fn get_d<T: DeserializeOwned, S: serde::Serialize>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         payload: Option<S>,
     ) -> Result<T> {
@@ -352,7 +342,7 @@ impl GenericClient {
         self.get_p(host, endpoint, req.as_deref()).await
     }
 
-    pub async fn post<T: DeserializeOwned>(&self, host: String, endpoint: &str, symbol: Option<&str>) -> Result<T> {
+    pub async fn post<T: DeserializeOwned>(&self, host: &str, endpoint: &str, symbol: Option<&str>) -> Result<T> {
         let url = symbol
             .map(|s| format!("{}{}?symbol={}", host, endpoint, s))
             .unwrap_or_else(|| format!("{}{}", host, endpoint));
@@ -364,7 +354,7 @@ impl GenericClient {
 
     pub async fn put<T: DeserializeOwned>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         listen_key: &str,
         symbol: Option<&str>,
@@ -381,7 +371,7 @@ impl GenericClient {
 
     pub async fn delete<T: DeserializeOwned>(
         &self,
-        host: String,
+        host: &str,
         endpoint: &str,
         listen_key: &str,
         symbol: Option<&str>,
@@ -401,7 +391,7 @@ impl GenericClient {
     }
 
     // Request must be signed
-    fn sign_request(&self, host: String, endpoint: &str, request: &str) -> String {
+    fn sign_request(&self, host: &str, endpoint: &str, request: &str) -> String {
         let signed_key = hmac::Key::new(hmac::HMAC_SHA256, self.secret_key.as_bytes());
         let signature = hex_encode(hmac::sign(&signed_key, request.as_bytes()).as_ref());
         let url = format!("{}{}?{}&signature={}", host, endpoint, request, signature);
