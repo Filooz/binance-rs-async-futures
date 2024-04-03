@@ -1,3 +1,4 @@
+use std::env;
 use std::time::Duration;
 
 use boolinator::Boolinator;
@@ -246,6 +247,12 @@ impl GenericClient {
             secret_key: secret_key.unwrap_or_else(|| "".into()),
             inner: builder.build().unwrap(),
         }
+    }
+
+    pub fn new_with_secrets() -> Result<Self> {
+        let api = env::var("BINANCE_API_KEY")?;
+        let secret = env::var("BINANCE_API_SECRET_KEY")?;
+        Ok(Self::new(Some(api), Some(secret), None))
     }
 
     pub async fn get_signed<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
