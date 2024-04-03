@@ -249,7 +249,7 @@ impl GenericClient {
         }
     }
 
-    pub fn new_with_secrets() -> Result<Self> {
+    pub fn new_with_secrets() -> eyre::Result<Self> {
         let api = env::var("BINANCE_API_KEY")?;
         let secret = env::var("BINANCE_API_SECRET_KEY")?;
         Ok(Self::new(Some(api), Some(secret), None))
