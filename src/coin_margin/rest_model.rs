@@ -1,6 +1,6 @@
-pub use crate::rest_model::{string_or_float, string_or_u64, Asks, Bids, BookTickers, KlineSummaries, KlineSummary,
-                            OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice, SymbolStatus, Tickers,
-                            TimeInForce};
+pub use crate::rest_model::{string_or_float, string_or_float_opt, string_or_u64, Asks, Bids, BookTickers,
+                            KlineSummaries, KlineSummary, OrderSide, OrderStatus, RateLimit, ServerTime, SymbolPrice,
+                            SymbolStatus, Tickers, TimeInForce};
 use crate::{futures::rest_model::{Filters, PositionSide},
             rest_model::OrderType};
 
@@ -203,26 +203,77 @@ pub enum ContractType {
     Empty,
 }
 
+use serde_with::skip_serializing_none;
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PremiumIndex {
     pub symbol: String,
-    pub pair: String,
+    pub pair: Option<String>,
     #[serde(with = "string_or_float")]
     pub mark_price: f64,
     #[serde(with = "string_or_float")]
     pub index_price: f64,
     #[serde(with = "string_or_float")]
     pub estimated_settle_price: f64,
-    #[serde(with = "string_or_float")]
-    pub last_funding_rate: f64,
-    #[serde(with = "string_or_float")]
-    pub interest_rate: f64,
+    #[serde(with = "string_or_float_opt")]
+    pub last_funding_rate: Option<f64>,
+    #[serde(with = "string_or_float_opt")]
+    pub interest_rate: Option<f64>,
     pub next_funding_time: u64,
     pub time: u64,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(untagged)]
 pub enum PremiumIndexResponse {
     One(PremiumIndex),
     Many(Vec<PremiumIndex>),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_prem_index() {
+        let res = r#"[
+            {
+                "symbol": "BTCUSD_PERP",
+                "pair": "BTCUSD",
+                "markPrice": "11029.69574559",
+                "indexPrice": "10979.14437500",
+                "estimatedSettlePrice": "10981.74168236",
+                "lastFundingRate": "0.00071003",
+                "interestRate": "0.00010000",
+                "nextFundingTime": 1596096000000,
+                "time": 1596094042000
+            },
+            {
+                "symbol": "BTCUSD_200925",  
+                "pair": "BTCUSD",
+                "markPrice": "12077.01343750",
+                "indexPrice": "10979.10312500",
+                "estimatedSettlePrice": "10981.74168236",
+                "lastFundingRate": "",
+                "interestRate": "", 
+                "nextFundingTime": 0,
+                "time": 1596094042000
+            },
+            {
+                "symbol": "BTCUSD_PERP",
+                "markPrice": "11029.69574559",
+                "indexPrice": "10979.14437500",
+                "estimatedSettlePrice": "10981.74168236",
+                "lastFundingRate": "0.00071003",
+                "interestRate": "0.00010000",
+                "nextFundingTime": 1596096000000,
+                "time": 1596094042000
+            }
+        ]"#;
+
+        let deser = serde_json::from_str::<Vec<PremiumIndex>>(res);
+        println!("{:?}", deser);
+        assert!(deser.is_ok());
+    }
 }

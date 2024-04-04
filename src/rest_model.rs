@@ -2009,7 +2009,8 @@ pub mod string_or_float {
     }
 }
 
-pub(crate) mod string_or_float_opt {
+pub mod string_or_float_opt {
+    use serde::Deserialize;
     use std::fmt;
 
     use serde::{Deserializer, Serializer};
@@ -2029,7 +2030,14 @@ pub(crate) mod string_or_float_opt {
     where
         D: Deserializer<'de>,
     {
-        Ok(Some(crate::rest_model::string_or_float::deserialize(deserializer)?))
+        let opt: Option<String> = Option::deserialize(deserializer)?;
+        match opt {
+            Some(ref s) if !s.is_empty() => match s.parse::<f64>() {
+                Ok(v) => Ok(Some(v)),
+                Err(_) => Err(serde::de::Error::custom("cannot parse float from string")),
+            },
+            _ => Ok(None), // Correctly handles both null and empty strings
+        }
     }
 }
 
