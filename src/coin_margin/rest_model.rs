@@ -202,3 +202,27 @@ pub enum ContractType {
     #[serde(rename = "")]
     Empty,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PremiumIndex {
+    pub symbol: String,
+    pub pair: String,
+    #[serde(with = "string_or_float")]
+    pub mark_price: f64,
+    #[serde(with = "string_or_float")]
+    pub index_price: f64,
+    #[serde(with = "string_or_float")]
+    pub estimated_settle_price: f64,
+    #[serde(with = "string_or_float")]
+    pub last_funding_rate: f64,
+    #[serde(with = "string_or_float")]
+    pub interest_rate: f64,
+    pub next_funding_time: u64,
+    pub time: u64,
+}
+
+pub enum PremiumIndexResponse {
+    One(PremiumIndex),
+    Many(Vec<PremiumIndex>),
+}
