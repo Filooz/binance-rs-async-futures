@@ -238,54 +238,25 @@ pub enum WorkingType {
 mod tests {
     use std::path::PathBuf;
 
-    use serde_json::json;
+    use serde_json::Value;
 
     use crate::coin_margin::ws_model::UserStreamEvent;
 
     #[test]
-    fn test_ws_model_deserialize_account() {
+    fn test_deserialize_userstream() {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("test_data/coin_userstream_account.json");
+        d.push("test_data/coin_userstream.json");
         let fc = std::fs::read_to_string(d).unwrap();
 
-        let account = serde_json::from_str::<UserStreamEvent>(&fc);
-        println!("{:?}", account);
-        assert!(account.is_ok());
-    }
-
-    #[test]
-    fn test_ws_model_deserialize_order_trade() {
-        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        d.push("test_data/coin_userstream_order_trade.json");
-        let fc = std::fs::read_to_string(d).unwrap();
-
-        let account = serde_json::from_str::<UserStreamEvent>(&fc);
-        println!("{:?}", account);
-        assert!(account.is_ok());
-    }
-
-    #[test]
-    fn test_userstream_deserialize_margin_call() {
-        let json = json!({
-            "e":"MARGIN_CALL",        // Event Type
-            "E":1587727187525 as i64,        // Event Time
-            "i": "SfsR",              // Account Alias
-            "cw":"3.16812045",        // Cross Wallet Balance. Only pushed with crossed position margin call
-            "p":[                     // Position(s) of Margin Call
-              {
-                "s":"BTCUSD_200925",  // Symbol
-                "ps":"LONG",          // Position Side
-                "pa":"132",           // Position Amount
-                "mt":"CROSSED",       // Margin Type
-                "iw":"0",             // Isolated Wallet (if isolated position)
-                "mp":"9187.17127000", // Mark Price
-                "up":"-1.166074",     // Unrealized PnL
-                "mm":"1.614445"       // Maintenance Margin Required
-              }
-            ]
-        }  );
-        let margin_call: Result<UserStreamEvent, _> = serde_json::from_value(json);
-        println!("{:?}", margin_call);
-        assert!(margin_call.is_ok());
+        let val_vec = serde_json::from_str::<Vec<Value>>(&fc).unwrap();
+        for val in val_vec {
+            match serde_json::from_value::<UserStreamEvent>(val.clone()) {
+                Ok(v) => {}
+                Err(e) => {
+                    println!("{:?}", val);
+                    panic!("{:?}", e)
+                }
+            }
+        }
     }
 }
