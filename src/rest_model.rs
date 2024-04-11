@@ -112,7 +112,6 @@ pub enum Filters {
     Notional {
         #[serde(with = "string_or_float")]
         min_notional: f64,
-        apply_to_market: bool,
         apply_min_to_market: bool,
         #[serde(with = "string_or_float")]
         max_notional: f64,
@@ -2152,9 +2151,9 @@ pub(crate) mod string_or_bool {
 
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
-
+    use super::*;
     use crate::rest_model::ExchangeInformation;
+    use std::path::PathBuf;
 
     #[test]
     fn exchange_info_serde() {
@@ -2162,6 +2161,15 @@ mod test {
         d.push("test_data/exchangeInfo.json");
         let fc = std::fs::read_to_string(d).unwrap();
         let result = serde_json::from_str::<ExchangeInformation>(&fc);
+        assert!(result.is_ok(), "{result:?}");
+    }
+
+    #[test]
+    fn filters_serde() {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("test_data/filters_doge.json");
+        let fc = std::fs::read_to_string(d).unwrap();
+        let result = serde_json::from_str::<Vec<Filters>>(&fc);
         assert!(result.is_ok(), "{result:?}");
     }
 }
