@@ -115,7 +115,7 @@ pub enum Filters {
         apply_to_market: bool,
         apply_min_to_market: bool,
         #[serde(with = "string_or_float")]
-        max_notional: Option<f64>,
+        max_notional: f64,
         apply_max_to_market: bool,
         avg_price_mins: u64,
     },
