@@ -9,6 +9,7 @@ use std::primitive::str;
 use super::rest_model::OrderSide;
 use super::rest_model::OrderStatus;
 use super::rest_model::TimeInForce;
+pub use crate::rest_model::{string_or_float, string_or_float_opt};
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE", tag = "e")]
@@ -171,8 +172,8 @@ pub struct OrderDetail {
     #[serde(rename = "N")]
     pub commission_asset: Option<String>,
 
-    #[serde(rename = "n", with = "rust_decimal::serde::str")]
-    pub commission: Decimal,
+    #[serde(default, rename = "n", with = "string_or_float_opt")]
+    pub commission: Option<f64>,
 
     #[serde(rename = "T")]
     pub order_trade_time: u64,
@@ -206,11 +207,11 @@ pub struct OrderDetail {
     #[serde(rename = "cp")]
     pub close_all: bool,
 
-    #[serde(rename = "AP", with = "rust_decimal::serde::str")]
-    pub activation_price: Decimal,
+    #[serde(default, rename = "n", with = "string_or_float_opt")]
+    pub activation_price: Option<f64>,
 
-    #[serde(rename = "cr", with = "rust_decimal::serde::str")]
-    pub callback_rate: Decimal,
+    #[serde(default, rename = "cr", with = "string_or_float_opt")]
+    pub callback_rate: Option<f64>,
 
     #[serde(rename = "pP")]
     pub price_protection: bool,
