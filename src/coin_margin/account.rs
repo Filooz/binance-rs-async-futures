@@ -1,13 +1,60 @@
 use std::collections::BTreeMap;
 
+use serde_with::skip_serializing_none;
+
 use crate::client::*;
 use crate::coin_margin::rest_model::*;
 use crate::errors::*;
+use crate::futures::rest_model::PositionSide;
+use crate::rest_model::OrderType;
 use crate::util::*;
+
+use super::ws_model::WorkingType;
 #[derive(Clone)]
 pub struct CoinAccount {
     pub client: Client,
     pub recv_window: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+#[skip_serializing_none]
+pub struct OrderRequest {
+    pub symbol: String,
+    pub side: OrderSide,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
+    pub position_side: Option<PositionSide>,
+    pub time_in_force: Option<TimeInForce>,
+    pub quantity: Option<f64>,
+    #[serde(rename = "reduceOnly")]
+    pub reduce_only: Option<String>,
+    pub price: Option<f64>,
+    #[serde(rename = "newClientOrderId")]
+    pub new_client_order_id: Option<String>,
+    #[serde(rename = "stopPrice")]
+    pub stop_price: Option<f64>,
+    #[serde(rename = "closePosition")]
+    pub close_position: Option<String>,
+    #[serde(rename = "activationPrice")]
+    pub activation_price: Option<f64>,
+    #[serde(rename = "callbackRate")]
+    pub callback_rate: Option<f64>,
+    #[serde(rename = "workingType")]
+    pub working_type: Option<WorkingType>,
+    #[serde(rename = "priceProtect")]
+    pub price_protect: Option<String>,
+    #[serde(rename = "newOrderRespType")]
+    pub new_order_resp_type: Option<NewOrderRespType>,
+    pub recv_window: Option<i64>,
+    pub timestamp: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum NewOrderRespType {
+    ACK,
+    RESULT,
 }
 
 impl CoinAccount {
