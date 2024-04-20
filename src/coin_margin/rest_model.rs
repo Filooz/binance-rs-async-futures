@@ -315,4 +315,35 @@ mod tests {
         println!("{:?}", deser);
         assert!(deser.is_ok());
     }
+
+    #[test]
+    fn test_cancel_order_by_id_deser() {
+        let json = r#"{
+            "avgPrice": "0.000",
+            "clientOrderId": "web_ovMGePGoUPGur6EVBAhr",
+            "closePosition": false,
+            "cumBase": "0",
+            "cumQty": "0",
+            "executedQty": "0",
+            "orderId": 9976224372,
+            "origQty": "1",
+            "origType": "LIMIT",
+            "pair": "SOLUSD",
+            "positionSide": "BOTH",
+            "price": "128.864",
+            "priceProtect": false,
+            "reduceOnly": false,
+            "side": "BUY",
+            "status": "CANCELED",
+            "stopPrice": "0",
+            "symbol": "SOLUSD_PERP",
+            "timeInForce": "GTC",
+            "type": "LIMIT",
+            "updateTime": 1713631939159,
+            "workingType": "CONTRACT_PRICE"
+        }"#;
+        let deser = serde_json::from_str::<Transaction>(json);
+        println!("{:?}", deser);
+        assert!(deser.is_ok());
+    }
 }

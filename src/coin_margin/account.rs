@@ -50,6 +50,19 @@ pub struct OrderRequest {
     pub timestamp: i64,
 }
 
+/// Order Cancellation and Replace Request
+/// Cancels an existing order and places a new order on the same symbol.
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelReplaceRequest {
+    pub orig_client_order_id: Option<String>,
+    pub symbol: String,
+    pub side: OrderSide,
+    pub quantity: Option<f64>,
+    pub price: Option<f64>,
+    pub recv_window: Option<u64>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum NewOrderRespType {
