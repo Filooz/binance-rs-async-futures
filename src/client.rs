@@ -448,53 +448,6 @@ impl GenericClient {
         Ok(header)
     }
 
-    // async fn send_request<S, T>(
-    //     &self,
-    //     host: &str,
-    //     endpoint: &str,
-    //     method: Method,
-    //     payload: S,
-    //     recv_window: u64,
-    // ) -> Result<T>
-    // where
-    //     S: Serialize,
-    //     T: DeserializeOwned,
-    // {
-    //     let request = match build_signed_request_p(payload, recv_window) {
-    //         Ok(r) => r,
-    //         Err(e) => {
-    //             return Err(Error::Msg(format!("Failed to build signed request: {}", e)));
-    //         }
-    //     };
-    //     let url = format!("{}{}", host, endpoint);
-    //     let response = match self
-    //         .inner
-    //         .request(method, &url)
-    //         .headers(self.build_headers(true)?)
-    //         .body(request)
-    //         .send()
-    //         .await
-    //     {
-    //         Ok(r) => r,
-    //         Err(e) => {
-    //             return Err(Error::Msg(format!("Failed to send request: {}", e)));
-    //         }
-    //     };
-
-    //     if let Err(e) = self.handler_check(&response).await {
-    //         return Err(Error::Msg(format!("Bad response: {}", e)));
-    //     }
-
-    //     let txt = response.text().await?;
-    //     let parsed = match serde_json::from_str(&txt) {
-    //         Ok(p) => p,
-    //         Err(e) => {
-    //             return Err(Error::Msg(format!("Failed to parse response: {} {}", txt, e)));
-    //         }
-    //     };
-    //     Ok(parsed)
-    // }
-
     pub async fn send_request<S, T>(
         &self,
         host: &str,
@@ -502,19 +455,22 @@ impl GenericClient {
         method: Method,
         payload: S,
         recv_window: u64,
+        signed: bool,
     ) -> eyre::Result<T>
     where
         S: Serialize,
         T: DeserializeOwned,
     {
-        let request = build_signed_request_p(payload, recv_window).wrap_err("Failed to build signed request")?;
+        let mut request = build_signed_request_p(payload, recv_window).wrap_err("Failed to build signed request")?;
+        if signed {
+            request = self.sign_request(host, endpoint, &request);
+        }
         println!("sending: {:?}", request);
-        let url = format!("{}{}", host, endpoint);
+        // let url = format!("{}{}", host, endpoint);
         let response = self
             .inner
-            .request(method, &url)
+            .request(method, &request)
             .headers(self.build_headers(true)?)
-            .body(request)
             .send()
             .await
             .wrap_err("Failed to send request")?;
