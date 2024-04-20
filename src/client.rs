@@ -495,7 +495,7 @@ impl GenericClient {
     //     Ok(parsed)
     // }
 
-    async fn send_request<S, T>(
+    pub async fn send_request<S, T>(
         &self,
         host: &str,
         endpoint: &str,
