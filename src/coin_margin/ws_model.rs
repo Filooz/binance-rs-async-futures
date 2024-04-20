@@ -17,6 +17,16 @@ pub enum UserStreamEvent {
     MarginCall(MarginCallEvent),
     AccountUpdate(AccountUpdateEvent),
     OrderTradeUpdate(OrderTradeUpdateEvent),
+    #[serde(rename = "camelCase")]
+    ListenKeyExpired(ListenKeyExpiredEvent),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ListenKeyExpiredEvent {
+    #[serde(rename = "E")]
+    pub event_time: u64,
+    #[serde(rename = "camelCase")]
+    pub listen_key: String,
 }
 
 #[skip_serializing_none]
