@@ -63,6 +63,7 @@ pub struct CancelReplaceRequest {
     pub order_type: OrderType,
     pub price: Option<f64>,
     pub recv_window: Option<u64>,
+    pub time_in_force: Option<TimeInForce>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
