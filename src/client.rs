@@ -376,6 +376,24 @@ impl GenericClient {
         self.handler(response).await
     }
 
+    pub async fn put_signed_p<T: de::DeserializeOwned, P: serde::Serialize>(
+        &self,
+        host: &str,
+        endpoint: &str,
+        payload: P,
+        recv_window: u64,
+    ) -> Result<T> {
+        let request = build_signed_request_p(payload, recv_window)?;
+        self.put_signed(host, endpoint, &request).await
+    }
+
+    pub async fn put_signed<T: DeserializeOwned>(&self, host: &str, endpoint: &str, request: &str) -> Result<T> {
+        let url = self.sign_request(host, endpoint, request);
+        let response = self.inner.put(url).headers(self.build_headers(true)?).send().await?;
+
+        self.handler(response).await
+    }
+
     pub async fn delete<T: DeserializeOwned>(
         &self,
         host: &str,
