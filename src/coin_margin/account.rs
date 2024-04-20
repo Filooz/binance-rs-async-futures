@@ -59,6 +59,8 @@ pub struct CancelReplaceRequest {
     pub symbol: String,
     pub side: OrderSide,
     pub quantity: Option<f64>,
+    #[serde(rename = "type")]
+    pub order_type: OrderType,
     pub price: Option<f64>,
     pub recv_window: Option<u64>,
 }
