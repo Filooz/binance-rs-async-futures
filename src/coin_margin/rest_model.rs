@@ -345,5 +345,35 @@ mod tests {
         let deser = serde_json::from_str::<Transaction>(json);
         println!("{:?}", deser);
         assert!(deser.is_ok());
+
+        let json2 = r#"
+        {
+            "avgPrice": "0.000",
+            "clientOrderId": "web_obnZDh7NGGkEszfEv4aB",
+            "closePosition": false,
+            "cumBase": "0",
+            "cumQty": "0",
+            "executedQty": "0",
+            "orderId": 9977561554,
+            "origQty": "1",
+            "origType": "LIMIT",
+            "pair": "SOLUSD",
+            "positionSide": "BOTH",
+            "price": "135",
+            "priceProtect": false,
+            "reduceOnly": false,
+            "side": "BUY",
+            "status": "NEW",
+            "stopPrice": "0",
+            "symbol": "SOLUSD_PERP",
+            "timeInForce": "GTC",
+            "type": "LIMIT",
+            "updateTime": 1713636626873,
+            "workingType": "CONTRACT_PRICE"
+        }
+        "#;
+        let deser2 = serde_json::from_str::<Transaction>(json2);
+        println!("{:?}", deser2);
+        assert!(deser2.is_ok());
     }
 }
