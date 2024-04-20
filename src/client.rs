@@ -508,6 +508,7 @@ impl GenericClient {
         T: DeserializeOwned,
     {
         let request = build_signed_request_p(payload, recv_window).wrap_err("Failed to build signed request")?;
+        println!("sending: {:?}", request);
         let url = format!("{}{}", host, endpoint);
         let response = self
             .inner
@@ -539,6 +540,25 @@ impl GenericClient {
             s => Err(Error::Msg(format!("Received response: {s:?}"))),
         }
     }
+
+    // async fn handler_check<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
+    //     let res = match response.status() {
+    //         StatusCode::OK => Ok(()),
+    //         StatusCode::INTERNAL_SERVER_ERROR => Err(Error::InternalServerError),
+    //         StatusCode::SERVICE_UNAVAILABLE => Err(Error::ServiceUnavailable),
+    //         StatusCode::UNAUTHORIZED => Err(Error::Unauthorized),
+    //         StatusCode::BAD_REQUEST => {
+    //             let error: BinanceContentError = response.json().await?;
+    //             Err(handle_content_error(error))
+    //         }
+    //         s => Err(Error::Msg(format!("Received response: {s:?}"))),
+    //     };
+    //     if let Err(e) = res {
+    //         return Err(e);
+    //     }
+    //     let txt = response.text().await.wrap_err("Failed to read response text")?;
+    //     serde_json::from_str::<T>(&txt).wrap_err_with(|| format!("Failed to parse response text: {}", txt))
+    // }
 
     async fn handler<T: de::DeserializeOwned>(&self, response: Response) -> Result<T> {
         match response.status() {
