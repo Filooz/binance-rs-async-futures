@@ -231,6 +231,45 @@ pub enum PremiumIndexResponse {
     Many(Vec<PremiumIndex>),
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Transaction {
+    pub client_order_id: String,
+    #[serde(with = "string_or_float")]
+    pub cum_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cum_base: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    pub order_id: i64,
+    #[serde(with = "string_or_float")]
+    pub avg_price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    pub reduce_only: bool,
+    pub side: String,
+    pub position_side: String,
+    pub status: String,
+    #[serde(with = "string_or_float")]
+    pub stop_price: f64,
+    pub close_position: bool,
+    pub symbol: String,
+    pub pair: String,
+    pub time_in_force: String,
+    #[serde(rename = "type")]
+    pub type_name: String,
+    pub orig_type: String,
+    #[serde(default, with = "string_or_float_opt")]
+    pub activate_price: Option<f64>,
+    #[serde(default, with = "string_or_float_opt")]
+    pub price_rate: Option<f64>,
+    pub update_time: i64,
+    pub working_type: String,
+    pub price_protect: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
