@@ -17,7 +17,7 @@ pub enum UserStreamEvent {
     MarginCall(MarginCallEvent),
     AccountUpdate(AccountUpdateEvent),
     OrderTradeUpdate(OrderTradeUpdateEvent),
-    #[serde(rename = "camelCase")]
+    #[serde(rename = "listenKeyExpired")]
     ListenKeyExpired(ListenKeyExpiredEvent),
 }
 
@@ -25,7 +25,7 @@ pub enum UserStreamEvent {
 pub struct ListenKeyExpiredEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
-    #[serde(rename = "camelCase")]
+    #[serde(rename = "listenKey")]
     pub listen_key: String,
 }
 
@@ -262,7 +262,20 @@ mod tests {
         let val_vec = serde_json::from_str::<Vec<Value>>(&fc).unwrap();
         for val in val_vec {
             match serde_json::from_value::<UserStreamEvent>(val.clone()) {
-                Ok(v) => {}
+                Ok(v) => match v {
+                    UserStreamEvent::MarginCall(_) => {
+                        println!("MarginCall");
+                    }
+                    UserStreamEvent::AccountUpdate(_) => {
+                        println!("AccountUpdate");
+                    }
+                    UserStreamEvent::OrderTradeUpdate(_) => {
+                        println!("OrderTradeUpdate");
+                    }
+                    UserStreamEvent::ListenKeyExpired(_) => {
+                        println!("ListenKeyExpired");
+                    }
+                },
                 Err(e) => {
                     println!("{:?}", val);
                     panic!("{:?}", e)
