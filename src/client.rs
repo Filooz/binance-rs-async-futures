@@ -465,8 +465,6 @@ impl GenericClient {
         if signed {
             request = self.sign_request(host, endpoint, &request);
         }
-        println!("sending: {:?}", request);
-        // let url = format!("{}{}", host, endpoint);
         let response = self
             .inner
             .request(method, &request)
