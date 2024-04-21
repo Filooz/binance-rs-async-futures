@@ -217,7 +217,7 @@ pub struct OrderDetail {
     #[serde(rename = "cp")]
     pub close_all: bool,
 
-    #[serde(default, rename = "n", with = "string_or_float_opt")]
+    #[serde(default, rename = "AP", with = "string_or_float_opt")]
     pub activation_price: Option<f64>,
 
     #[serde(default, rename = "cr", with = "string_or_float_opt")]
