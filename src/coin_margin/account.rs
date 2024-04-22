@@ -126,6 +126,7 @@ mod tests {
 
     use super::*;
     use dotenvy::dotenv;
+    use reqwest::Method;
     // use serde_json::Value;
     #[tokio::test]
     async fn test_coinm_account_open_order() {
@@ -177,7 +178,11 @@ mod tests {
         let res = client
             .get_signed_p::<Vec<CoinmBrackets>, String>(host, url, None, 1500)
             .await;
-        println!("{:?}", res);
+        assert!(res.is_ok());
+
+        let res = client
+            .send_request::<String, Vec<CoinmBrackets>>(host, url, Method::GET, None, 1500, true)
+            .await;
         assert!(res.is_ok());
     }
 }

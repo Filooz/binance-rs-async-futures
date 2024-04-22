@@ -453,7 +453,7 @@ impl GenericClient {
         host: &str,
         endpoint: &str,
         method: Method,
-        payload: S,
+        payload: Option<S>,
         recv_window: u64,
         signed: bool,
     ) -> eyre::Result<T>
