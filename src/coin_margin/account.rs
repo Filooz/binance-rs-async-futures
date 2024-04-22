@@ -77,20 +77,20 @@ pub enum NewOrderRespType {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CoinmBrackets {
     #[serde(alias = "pair")]
-    symbol: String,
-    brackets: Vec<CoinmBracket>,
+    pub symbol: String,
+    pub brackets: Vec<CoinmBracket>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CoinmBracket {
-    bracket: u8,
-    initial_leverage: u64,
-    qty_cap: u64,
-    qty_floor: u64,
+    pub bracket: u8,
+    pub initial_leverage: u64,
+    pub qty_cap: u64,
+    pub qty_floor: u64,
     #[serde(rename = "maintMarginRatio")]
-    maintenance_margin_ratio: f64,
-    cum: f64,
+    pub maintenance_margin_ratio: f64,
+    pub cum: f64,
 }
 
 impl CoinAccount {
