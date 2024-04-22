@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+// use rust_decimal::Decimal;
 use serde_with::skip_serializing_none;
 
 use crate::client::*;
@@ -73,6 +74,25 @@ pub enum NewOrderRespType {
     RESULT,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CoinmBrackets {
+    #[serde(alias = "pair")]
+    symbol: String,
+    brackets: Vec<CoinmBracket>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CoinmBracket {
+    bracket: u8,
+    initial_leverage: u64,
+    qty_cap: u64,
+    qty_floor: u64,
+    #[serde(rename = "maintMarginRatio")]
+    maintenance_margin_ratio: f64,
+    cum: f64,
+}
+
 impl CoinAccount {
     /// Get currently open orders
     pub async fn get_open_orders(&self, symbol: impl Into<String>) -> Result<Vec<Order>> {
@@ -106,6 +126,7 @@ mod tests {
 
     use super::*;
     use dotenvy::dotenv;
+    // use serde_json::Value;
     #[tokio::test]
     async fn test_coinm_account_open_order() {
         // setup logger
@@ -144,5 +165,19 @@ mod tests {
         let balance = account.account_balance().await;
         println!("{:?}", balance);
         assert!(balance.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_coinm_brackets() {
+        // setup logger
+        dotenv().ok();
+        let client = GenericClient::new_with_secrets().unwrap();
+        let host = "https://dapi.binance.com";
+        let url = "/dapi/v2/leverageBracket";
+        let res = client
+            .get_signed_p::<Vec<CoinmBrackets>, String>(host, url, None, 1500)
+            .await;
+        println!("{:?}", res);
+        assert!(res.is_ok());
     }
 }
