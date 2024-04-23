@@ -117,7 +117,7 @@ pub struct Position {
     #[serde(rename = "iw", with = "rust_decimal::serde::str")]
     pub isolated_wallet: Decimal,
     #[serde(rename = "ps")]
-    pub position_side: String,
+    pub position_side: PositionSide,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
