@@ -270,6 +270,19 @@ pub struct Transaction {
     pub price_protect: bool,
 }
 
+// pub struct PriceResponse {
+//     pub symbol: String,
+//     #[serde(with = "string_or_float")]
+//     pub price,
+//     pub time: u64,
+//     {
+//         "symbol": "BTCUSD_200626",
+//         "ps": "9647.8",             // pair
+//         "price": "9647.8",
+//         "time": 1591257246176
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;

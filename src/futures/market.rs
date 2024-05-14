@@ -1,8 +1,7 @@
 use crate::client::*;
 use crate::errors::*;
 use crate::futures::rest_model::*;
-use crate::rest_model::{BookTickers, KlineSummaries, KlineSummary, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
-use crate::util::*;
+use crate::rest_model::{BookTickers, KlineSummaries, PairAndWindowQuery, PairQuery, SymbolPrice, Tickers};
 use serde_json::Value;
 
 //TODO : Validate intervals and start/end times in history queries
@@ -310,25 +309,25 @@ impl FuturesMarket {
             period: None,
         };
         let data: Vec<Vec<Value>> = self.client.get_d("/fapi/v1/klines", Some(query)).await?;
-
-        let klines = KlineSummaries::AllKlineSummaries(
-            data.iter()
-                .map(|row| KlineSummary {
-                    open_time: to_i64(&row[0]),
-                    open: to_f64(&row[1]),
-                    high: to_f64(&row[2]),
-                    low: to_f64(&row[3]),
-                    close: to_f64(&row[4]),
-                    volume: to_f64(&row[5]),
-                    close_time: to_i64(&row[6]),
-                    quote_asset_volume: to_f64(&row[7]),
-                    number_of_trades: to_i64(&row[8]),
-                    taker_buy_base_asset_volume: to_f64(&row[9]),
-                    taker_buy_quote_asset_volume: to_f64(&row[10]),
-                })
-                .collect(),
-        );
-        Ok(klines)
+        unimplemented!("TODO: Parse klines");
+        // let klines = KlineSummaries::AllKlineSummaries(
+        //     data.iter()
+        //         .map(|row| KlineSummary {
+        //             open_time: to_i64(&row[0]),
+        //             open: to_f64(&row[1]),
+        //             high: to_f64(&row[2]),
+        //             low: to_f64(&row[3]),
+        //             close: to_f64(&row[4]),
+        //             volume: to_f64(&row[5]),
+        //             close_time: to_i64(&row[6]),
+        //             quote_asset_volume: to_f64(&row[7]),
+        //             number_of_trades: to_i64(&row[8]),
+        //             taker_buy_base_asset_volume: to_f64(&row[9]),
+        //             taker_buy_quote_asset_volume: to_f64(&row[10]),
+        //         })
+        //         .collect(),
+        // );
+        // Ok(klines)
     }
 
     /// Returns up to 'limit' blvt klines for given symbol and interval ("1m", "5m", ...)
@@ -422,7 +421,7 @@ impl FuturesMarket {
             end_time: end_time.into(),
             limit: limit.into(),
             pair: symbol.into(),
-            interval: Some(interval.into())
+            interval: Some(interval.into()),
         };
 
         let klines = self.client.get_d("/fapi/v1/indexPriceKlines", Some(query)).await?;

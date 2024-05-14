@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use serde_with::{serde_as, DisplayFromStr};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -1395,20 +1396,30 @@ pub struct InterestRateAssetHistory {
 
 pub type InterestRateHistory = Vec<InterestRateAssetHistory>;
 
+#[serde_as]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct KlineSummary {
     pub open_time: i64,
+    #[serde_as(as = "DisplayFromStr")]
     pub open: f64,
+    #[serde_as(as = "DisplayFromStr")]
     pub high: f64,
+    #[serde_as(as = "DisplayFromStr")]
     pub low: f64,
+    #[serde_as(as = "DisplayFromStr")]
     pub close: f64,
+    #[serde_as(as = "DisplayFromStr")]
     pub volume: f64,
     pub close_time: i64,
+    #[serde_as(as = "DisplayFromStr")]
     pub quote_asset_volume: f64,
     pub number_of_trades: i64,
+    #[serde_as(as = "DisplayFromStr")]
     pub taker_buy_base_asset_volume: f64,
+    #[serde_as(as = "DisplayFromStr")]
     pub taker_buy_quote_asset_volume: f64,
+    pub ignore: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
