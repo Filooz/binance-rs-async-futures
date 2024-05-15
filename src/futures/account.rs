@@ -84,6 +84,26 @@ struct ChangePositionModeRequest {
     pub dual_side_position: bool,
 }
 
+#[derive(Serialize, Default, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UsdmBrackets {
+    pub symbol: String,
+    pub notional_coef: Option<f64>,
+    pub brackets: Vec<UsdmBracket>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UsdmBracket {
+    pub bracket: u8,
+    pub initial_leverage: u8,
+    pub notional_cap: f64,
+    pub notional_floor: f64,
+    #[serde(rename = "maintMarginRatio")]
+    pub maintenance_margin_ratio: f64,
+    pub cum: f64,
+}
+
 impl FuturesAccount {
     /// Get an order
     pub async fn get_order(&self, order: Option<GetOrderRequest>) -> Result<Transaction> {
@@ -302,5 +322,35 @@ impl FuturesAccount {
                 self.recv_window,
             )
             .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use dotenvy::dotenv;
+    use reqwest::Method;
+
+    use crate::client::GenericClient;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_usdm_brackets() {
+        dotenv().ok();
+        let client = GenericClient::new_with_secrets().unwrap();
+        let host = "https://fapi.binance.com";
+        let url = "/fapi/v1/leverageBracket";
+
+        let res = client
+            .get_signed_p::<Vec<UsdmBrackets>, String>(host, url, None, 1500)
+            .await;
+        assert!(res.is_ok(), "failed first call: {:?}", res);
+
+        let res = client
+            .send_request::<Vec<UsdmBrackets>, String>(host, url, Method::GET, None, 1500, true)
+            .await;
+        println!("{:?}", res);
+
+        assert!(res.is_ok(), "failed second call: {:?}", res);
     }
 }
