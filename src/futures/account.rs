@@ -84,7 +84,7 @@ struct ChangePositionModeRequest {
     pub dual_side_position: bool,
 }
 
-#[derive(Serialize, Default, Deserialize, Debug)]
+#[derive(Serialize, Default, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UsdmBrackets {
     pub symbol: String,
@@ -92,7 +92,7 @@ pub struct UsdmBrackets {
     pub brackets: Vec<UsdmBracket>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UsdmBracket {
     pub bracket: u8,
